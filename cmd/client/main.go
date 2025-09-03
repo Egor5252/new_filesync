@@ -31,7 +31,8 @@ func main() {
 		return
 	}
 
-	for _, file := range files.Files {
+	for i, file := range files.Files {
+		fmt.Printf("%v из %v\n", i+1, len(files.Files))
 		client.DownloadFile(ctx, client_conn, &proto.FileRequest{
 			Path: file.Path,
 		}, cfg.MainPath)
