@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package sync;
+
+option go_package = "new_filesync/proto";
+
+service SyncService {
+  rpc ListFiles (FileListRequest) returns (FileListResponse);
+  rpc UploadFile (stream FileChunk) returns (UploadStatus);
+  rpc DownloadFile (FileRequest) returns (stream FileChunk);
+}
+
+message FileMeta {
+  string path = 1;
+  int64 size = 2;
+  int64 modified_unix = 3;
+  string hash = 4;
+}
+
+message FileListRequest {}
+
+message FileListResponse {
+  repeated FileMeta files = 1;
+}
+
+message FileRequest {
+  string path = 1;
+}
+
+message FileChunk {
+  string path = 1;
+  bytes content = 2;
+}
+
+message UploadStatus {
+  bool success = 1;
+  string message = 2;
+}
