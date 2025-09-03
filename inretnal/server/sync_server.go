@@ -41,7 +41,7 @@ func (s *SyncServer) UploadFile(stream grpc.ClientStreamingServer[proto.FileChun
 				}
 				return stream.SendAndClose(&proto.UploadStatus{
 					Success: true,
-					Message: fmt.Sprintf("%v - OK", path),
+					Message: path,
 				})
 			} else {
 				if close != nil {
