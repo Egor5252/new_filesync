@@ -27,6 +27,7 @@ func (s *SyncServer) ListFiles(ctx context.Context, req *proto.FileListRequest) 
 func (s *SyncServer) UploadFile(stream grpc.ClientStreamingServer[proto.FileChunk, proto.UploadStatus]) error {
 	var write func([]byte) error
 	var close func() error
+	var path string
 
 	for {
 		fileChunk, err := stream.Recv()
@@ -40,7 +41,7 @@ func (s *SyncServer) UploadFile(stream grpc.ClientStreamingServer[proto.FileChun
 				}
 				return stream.SendAndClose(&proto.UploadStatus{
 					Success: true,
-					Message: "Файл записан и сохранён",
+					Message: fmt.Sprintf("%v - OK", path),
 				})
 			} else {
 				if close != nil {
@@ -54,6 +55,7 @@ func (s *SyncServer) UploadFile(stream grpc.ClientStreamingServer[proto.FileChun
 		}
 
 		if write == nil {
+			path = fileChunk.Path
 			write, close, err = fs.FileWriter("cmd/server/sync-data/source", fileChunk.Path)
 			if err != nil {
 				return err
