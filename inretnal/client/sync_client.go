@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"log"
+	"new_filesync/inretnal/fs"
 	"new_filesync/proto"
 	"os"
 	"path/filepath"
@@ -53,4 +54,76 @@ func UploadFile(ctx context.Context, client proto.SyncServiceClient, mainPath, f
 	log.Printf("Upload success: %v — %v", resp.Success, resp.Message)
 
 	return nil
+}
+
+// Usege
+// err = filepath.WalkDir(cfg.MainPath, func(path string, d os.DirEntry, err error) error {
+// 		if err != nil {
+// 			return err // ошибка доступа к файлу
+// 		}
+
+// 		if d.IsDir() {
+// 			return nil // пропускаем директории
+// 		}
+
+// 		if err := client.UploadFile(ctx, client_conn, cfg.MainPath, path); err != nil {
+// 			return err
+// 		}
+
+// 		return nil
+// 	})
+
+// 	if err != nil {
+// 		return
+// 	}
+
+func DownloadFile(ctx context.Context, client_conn proto.SyncServiceClient, fileReq *proto.FileRequest, mainPath string) error {
+	stream, err := client_conn.DownloadFile(ctx, fileReq)
+	if err != nil {
+		return err
+	}
+
+	var write func([]byte) error
+	var close func() error
+
+	for {
+		fileChunk, err := stream.Recv()
+		if err != nil {
+			if err == io.EOF {
+				if close != nil {
+					err = close()
+					if err != nil {
+						return err
+					}
+				}
+				return nil
+			} else {
+				if close != nil {
+					err = close()
+					if err != nil {
+						return err
+					}
+				}
+				return err
+			}
+		}
+
+		if write == nil {
+			write, close, err = fs.FileWriter(mainPath, filepath.Clean(fileChunk.Path))
+			if err != nil {
+				return err
+			}
+		}
+
+		err = write(fileChunk.Content)
+		if err != nil {
+			if close != nil {
+				err = close()
+				if err != nil {
+					return err
+				}
+			}
+			return err
+		}
+	}
 }

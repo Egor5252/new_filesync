@@ -6,6 +6,8 @@ import (
 	"io"
 	"new_filesync/inretnal/fs"
 	"new_filesync/proto"
+	"os"
+	"path/filepath"
 
 	"google.golang.org/grpc"
 )
@@ -73,4 +75,35 @@ func (s *SyncServer) UploadFile(stream grpc.ClientStreamingServer[proto.FileChun
 			return err
 		}
 	}
+}
+
+func (s *SyncServer) DownloadFile(fileRequest *proto.FileRequest, stream grpc.ServerStreamingServer[proto.FileChunk]) error {
+	fullPath := filepath.Join("cmd/server/sync-data/source", filepath.Clean(fileRequest.Path))
+
+	file, err := os.Open(fullPath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	buffer := make([]byte, 32*1024)
+
+	for {
+		n, err := file.Read(buffer)
+		if err != nil && err != io.EOF {
+			return err
+		}
+		if n == 0 {
+			break // EOF
+		}
+
+		if err := stream.Send(&proto.FileChunk{
+			Path:    fileRequest.Path,
+			Content: buffer[:n],
+		}); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

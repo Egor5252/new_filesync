@@ -7,8 +7,6 @@ import (
 	"new_filesync/config"
 	"new_filesync/inretnal/client"
 	"new_filesync/proto"
-	"os"
-	"path/filepath"
 	"time"
 
 	"google.golang.org/grpc"
@@ -28,23 +26,14 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	err = filepath.WalkDir(cfg.MainPath, func(path string, d os.DirEntry, err error) error {
-		if err != nil {
-			return err // ошибка доступа к файлу
-		}
-
-		if d.IsDir() {
-			return nil // пропускаем директории
-		}
-
-		if err := client.UploadFile(ctx, client_conn, cfg.MainPath, path); err != nil {
-			return err
-		}
-
-		return nil
-	})
-
+	files, err := client_conn.ListFiles(ctx, &proto.FileListRequest{})
 	if err != nil {
 		return
+	}
+
+	for _, file := range files.Files {
+		client.DownloadFile(ctx, client_conn, &proto.FileRequest{
+			Path: file.Path,
+		}, cfg.MainPath)
 	}
 }
