@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"log"
 	clientfunctions "new_filesync/cmd/client/client_functions"
-	"path/filepath"
-	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -22,16 +20,22 @@ var pullCmd = &cobra.Command{
 			return
 		}
 
-		asd, err := clientfunctions.Check(cfg, clientConn)
+		filesToDownload, filesToDelete, err := clientfunctions.CheckFilesFromServer(cfg, clientConn)
 		if err != nil {
-			log.Fatalln(err)
+			return
 		}
 
-		for _, val := range asd.Files {
-			fmt.Printf("Файл %v, путь %v, размер %v, последнее изменение %v, хеш %v\n", filepath.Base(val.Path), val.Path, val.Size, time.Unix(val.ModifiedUnix, 0).Format("02.01.2006"), val.Hash)
+		fmt.Println("Файлы для загрузки")
+		for _, file := range filesToDownload.Files {
+			fmt.Println(file)
 		}
 
-		if err := clientfunctions.Download(cfg, clientConn); err != nil {
+		fmt.Println("Файлы для удаления")
+		for _, file := range filesToDelete.Files {
+			fmt.Println(file)
+		}
+
+		if err := clientfunctions.Pull(cfg, clientConn); err != nil {
 			log.Fatalln(err)
 			return
 		}
