@@ -27,7 +27,7 @@ func Check(cfg *config.Config, client_conn proto.SyncServiceClient) (*proto.File
 
 	for _, serverFile := range serverFiles.Files {
 		if !slices.ContainsFunc(clientFiles.Files, func(file *proto.FileMeta) bool {
-			return file.Hash == serverFile.Hash
+			return file.Hash == serverFile.Hash && file.Path == serverFile.Path
 		}) {
 			missingFiles = append(missingFiles, serverFile)
 		}

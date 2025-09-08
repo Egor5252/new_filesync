@@ -9,11 +9,11 @@ import (
 	"time"
 )
 
-func DownloadAll(cfg *config.Config, client_conn proto.SyncServiceClient) error {
+func Download(cfg *config.Config, client_conn proto.SyncServiceClient) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
 	defer cancel()
 
-	files, err := client_conn.ListFiles(ctx, &proto.FileListRequest{})
+	files, err := Check(cfg, client_conn)
 	if err != nil {
 		return err
 	}
