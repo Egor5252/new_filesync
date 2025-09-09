@@ -12,16 +12,18 @@ var pullCmd = &cobra.Command{
 	Use:   "pull",
 	Short: "Pull files from server",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Выполняется команда pull")
+		log.Println("Выполняется команда pull")
 
-		cfg, clientConn, err := clientfunctions.StartClient()
+		cfg, clientConn, clientClose, err := clientfunctions.StartClient()
 		if err != nil {
-			log.Fatalln(err)
+			log.Println(err)
 			return
 		}
+		defer clientClose()
 
 		filesToDownload, filesToDelete, err := clientfunctions.CheckFilesFromServer(cfg, clientConn)
 		if err != nil {
+			log.Println(err)
 			return
 		}
 
@@ -36,7 +38,7 @@ var pullCmd = &cobra.Command{
 		}
 
 		if err := clientfunctions.Pull(cfg, clientConn); err != nil {
-			log.Fatalln(err)
+			log.Println(err)
 			return
 		}
 	},
