@@ -14,7 +14,7 @@ import (
 func main() {
 	cfg := config.MustLoad()
 
-	lis, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%v", cfg.ServerPort))
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%v", cfg.ServerPort))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
