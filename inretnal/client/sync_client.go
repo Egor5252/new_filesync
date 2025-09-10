@@ -3,7 +3,6 @@ package client
 import (
 	"context"
 	"io"
-	"log"
 	"new_filesync/inretnal/fs"
 	"new_filesync/proto"
 	"os"
@@ -46,12 +45,10 @@ func UploadFile(ctx context.Context, client proto.SyncServiceClient, mainPath, f
 		}
 	}
 
-	resp, err := stream.CloseAndRecv()
+	_, err = stream.CloseAndRecv()
 	if err != nil {
 		return err
 	}
-
-	log.Printf("Upload success: %v — %v", resp.Success, resp.Message)
 
 	return nil
 }

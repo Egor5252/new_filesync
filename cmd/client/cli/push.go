@@ -8,11 +8,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var pullCmd = &cobra.Command{
-	Use:   "pull",
-	Short: "Синхронизация локальной папки с папкой на сервере",
+var pushCmd = &cobra.Command{
+	Use:   "push",
+	Short: "Синхронизация папки на сервере с локальной папкой",
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Println("Выполняется команда pull")
+		log.Println("Выполняется команда push")
 
 		cfg, clientConn, clientClose, err := clientfunctions.StartClient()
 		if err != nil {
@@ -21,14 +21,14 @@ var pullCmd = &cobra.Command{
 		}
 		defer clientClose()
 
-		filesToDownload, filesToDelete, err := clientfunctions.CheckFilesFromServer(cfg, clientConn)
+		filesToUpload, filesToDelete, err := clientfunctions.CheckFilesFromClient(cfg, clientConn)
 		if err != nil {
 			log.Println(err)
 			return
 		}
 
-		fmt.Println("Файлы для загрузки")
-		for _, file := range filesToDownload.Files {
+		fmt.Println("Файлы для отправки")
+		for _, file := range filesToUpload.Files {
 			fmt.Println(file)
 		}
 
@@ -37,7 +37,7 @@ var pullCmd = &cobra.Command{
 			fmt.Println(file)
 		}
 
-		if err := clientfunctions.Pull(cfg, clientConn); err != nil {
+		if err := clientfunctions.Push(cfg, clientConn); err != nil {
 			log.Println(err)
 			return
 		}
@@ -45,5 +45,5 @@ var pullCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(pullCmd)
+	rootCmd.AddCommand(pushCmd)
 }
