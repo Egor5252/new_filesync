@@ -338,11 +338,13 @@ const file_sync_proto_rawDesc = "" +
 	"\acontent\x18\x02 \x01(\fR\acontent\"B\n" +
 	"\fUploadStatus\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage2\xb4\x01\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage2\xe9\x01\n" +
 	"\vSyncService\x12:\n" +
 	"\tListFiles\x12\x15.sync.FileListRequest\x1a\x16.sync.FileListResponse\x123\n" +
 	"\n" +
-	"UploadFile\x12\x0f.sync.FileChunk\x1a\x12.sync.UploadStatus(\x01\x124\n" +
+	"UploadFile\x12\x0f.sync.FileChunk\x1a\x12.sync.UploadStatus(\x01\x123\n" +
+	"\n" +
+	"DeleteFile\x12\x11.sync.FileRequest\x1a\x12.sync.UploadStatus\x124\n" +
 	"\fDownloadFile\x12\x11.sync.FileRequest\x1a\x0f.sync.FileChunk0\x01B\x14Z\x12new_filesync/protob\x06proto3"
 
 var (
@@ -370,12 +372,14 @@ var file_sync_proto_depIdxs = []int32{
 	0, // 0: sync.FileListResponse.files:type_name -> sync.FileMeta
 	1, // 1: sync.SyncService.ListFiles:input_type -> sync.FileListRequest
 	4, // 2: sync.SyncService.UploadFile:input_type -> sync.FileChunk
-	3, // 3: sync.SyncService.DownloadFile:input_type -> sync.FileRequest
-	2, // 4: sync.SyncService.ListFiles:output_type -> sync.FileListResponse
-	5, // 5: sync.SyncService.UploadFile:output_type -> sync.UploadStatus
-	4, // 6: sync.SyncService.DownloadFile:output_type -> sync.FileChunk
-	4, // [4:7] is the sub-list for method output_type
-	1, // [1:4] is the sub-list for method input_type
+	3, // 3: sync.SyncService.DeleteFile:input_type -> sync.FileRequest
+	3, // 4: sync.SyncService.DownloadFile:input_type -> sync.FileRequest
+	2, // 5: sync.SyncService.ListFiles:output_type -> sync.FileListResponse
+	5, // 6: sync.SyncService.UploadFile:output_type -> sync.UploadStatus
+	5, // 7: sync.SyncService.DeleteFile:output_type -> sync.UploadStatus
+	4, // 8: sync.SyncService.DownloadFile:output_type -> sync.FileChunk
+	5, // [5:9] is the sub-list for method output_type
+	1, // [1:5] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
 	1, // [1:1] is the sub-list for extension extendee
 	0, // [0:1] is the sub-list for field type_name

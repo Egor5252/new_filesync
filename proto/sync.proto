@@ -7,6 +7,7 @@ option go_package = "new_filesync/proto";
 service SyncService {
   rpc ListFiles (FileListRequest) returns (FileListResponse);
   rpc UploadFile (stream FileChunk) returns (UploadStatus);
+  rpc DeleteFile (FileRequest) returns (UploadStatus);
   rpc DownloadFile (FileRequest) returns (stream FileChunk);
 }
 

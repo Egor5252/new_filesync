@@ -15,7 +15,7 @@ func Push(cfg *config.Config, client_conn proto.SyncServiceClient) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*60)
 	defer cancel()
 
-	filesToUpload, _, err := CheckFilesFromClient(cfg, client_conn)
+	filesToUpload, filesToDelete, err := CheckFilesFromClient(cfg, client_conn)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -28,10 +28,14 @@ func Push(cfg *config.Config, client_conn proto.SyncServiceClient) error {
 		}
 	}
 
-	// for i, file := range filesToDelete.Files {
-	// 	fmt.Printf("%v из %v\n", i+1, len(filesToDelete.Files))
-	// 	os.Remove(filepath.Join(cfg.MainPath, file.Path))
-	// }
+	for i, file := range filesToDelete.Files {
+		fmt.Printf("%v из %v\n", i+1, len(filesToDelete.Files))
+		status, err := client_conn.DeleteFile(ctx, &proto.FileRequest{Path: file.Path})
+		if err != nil {
+			return err
+		}
+		fmt.Println(status)
+	}
 
 	return nil
 }

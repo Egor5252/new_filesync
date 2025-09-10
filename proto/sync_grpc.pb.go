@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	SyncService_ListFiles_FullMethodName    = "/sync.SyncService/ListFiles"
 	SyncService_UploadFile_FullMethodName   = "/sync.SyncService/UploadFile"
+	SyncService_DeleteFile_FullMethodName   = "/sync.SyncService/DeleteFile"
 	SyncService_DownloadFile_FullMethodName = "/sync.SyncService/DownloadFile"
 )
 
@@ -30,6 +31,7 @@ const (
 type SyncServiceClient interface {
 	ListFiles(ctx context.Context, in *FileListRequest, opts ...grpc.CallOption) (*FileListResponse, error)
 	UploadFile(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[FileChunk, UploadStatus], error)
+	DeleteFile(ctx context.Context, in *FileRequest, opts ...grpc.CallOption) (*UploadStatus, error)
 	DownloadFile(ctx context.Context, in *FileRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[FileChunk], error)
 }
 
@@ -64,6 +66,16 @@ func (c *syncServiceClient) UploadFile(ctx context.Context, opts ...grpc.CallOpt
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type SyncService_UploadFileClient = grpc.ClientStreamingClient[FileChunk, UploadStatus]
 
+func (c *syncServiceClient) DeleteFile(ctx context.Context, in *FileRequest, opts ...grpc.CallOption) (*UploadStatus, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UploadStatus)
+	err := c.cc.Invoke(ctx, SyncService_DeleteFile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *syncServiceClient) DownloadFile(ctx context.Context, in *FileRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[FileChunk], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	stream, err := c.cc.NewStream(ctx, &SyncService_ServiceDesc.Streams[1], SyncService_DownloadFile_FullMethodName, cOpts...)
@@ -89,6 +101,7 @@ type SyncService_DownloadFileClient = grpc.ServerStreamingClient[FileChunk]
 type SyncServiceServer interface {
 	ListFiles(context.Context, *FileListRequest) (*FileListResponse, error)
 	UploadFile(grpc.ClientStreamingServer[FileChunk, UploadStatus]) error
+	DeleteFile(context.Context, *FileRequest) (*UploadStatus, error)
 	DownloadFile(*FileRequest, grpc.ServerStreamingServer[FileChunk]) error
 	mustEmbedUnimplementedSyncServiceServer()
 }
@@ -105,6 +118,9 @@ func (UnimplementedSyncServiceServer) ListFiles(context.Context, *FileListReques
 }
 func (UnimplementedSyncServiceServer) UploadFile(grpc.ClientStreamingServer[FileChunk, UploadStatus]) error {
 	return status.Errorf(codes.Unimplemented, "method UploadFile not implemented")
+}
+func (UnimplementedSyncServiceServer) DeleteFile(context.Context, *FileRequest) (*UploadStatus, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteFile not implemented")
 }
 func (UnimplementedSyncServiceServer) DownloadFile(*FileRequest, grpc.ServerStreamingServer[FileChunk]) error {
 	return status.Errorf(codes.Unimplemented, "method DownloadFile not implemented")
@@ -155,6 +171,24 @@ func _SyncService_UploadFile_Handler(srv interface{}, stream grpc.ServerStream) 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type SyncService_UploadFileServer = grpc.ClientStreamingServer[FileChunk, UploadStatus]
 
+func _SyncService_DeleteFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SyncServiceServer).DeleteFile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SyncService_DeleteFile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SyncServiceServer).DeleteFile(ctx, req.(*FileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _SyncService_DownloadFile_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(FileRequest)
 	if err := stream.RecvMsg(m); err != nil {
@@ -176,6 +210,10 @@ var SyncService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListFiles",
 			Handler:    _SyncService_ListFiles_Handler,
+		},
+		{
+			MethodName: "DeleteFile",
+			Handler:    _SyncService_DeleteFile_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

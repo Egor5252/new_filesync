@@ -107,3 +107,13 @@ func (s *SyncServer) DownloadFile(fileRequest *proto.FileRequest, stream grpc.Se
 
 	return nil
 }
+
+func (s *SyncServer) DeleteFile(cfg context.Context, fileRequest *proto.FileRequest) (*proto.UploadStatus, error) {
+	fullPath := filepath.Join("cmd/server/sync-data/source", filepath.Clean(fileRequest.Path))
+
+	if err := os.Remove(fullPath); err != nil {
+		return &proto.UploadStatus{Success: false, Message: "Ошибка удаления файла: "}, err
+	}
+
+	return &proto.UploadStatus{Success: true, Message: fmt.Sprintf("Файл %v удалён", fullPath)}, nil
+}
